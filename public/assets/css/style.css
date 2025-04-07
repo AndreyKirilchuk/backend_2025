@@ -1,0 +1,13 @@
+.error
+{
+    color: #ef4444;
+}
+
+.input-error
+{
+    border: 1px solid #ef4444;
+}
+
+*{
+    text-decoration: none;
+}
