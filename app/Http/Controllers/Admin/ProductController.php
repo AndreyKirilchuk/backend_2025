@@ -47,14 +47,32 @@ class ProductController extends Controller
 
         $image = imagecreatefromjpeg($image);
 
-        $black = imagecolorallocate($image, 0, 0, 0);
-        $white = imagecolorallocate($image, 255, 255, 255);
+        $size = 300;
+        $width = imagesx($image);
+        $height = imagesy($image);
 
-        imagefilledrectangle($image, 20, 20, 100, 50, $black);
-        imagettftext($image, 20, 0, 60, 35, $white, public_path('/assets/fonts/arial.ttf'), 'Shop');
+        $scale = min($size / $width, $size / $height);
+        $newWidth = (int)($scale * $width);
+        $newHeight = (int)($scale * $height);
 
-        $path = "previews/" . Str::uuid() . ".jpg";
-        imagejpeg($image, public_path($path));
+        $newImg = imagecreatetruecolor($newWidth, $newHeight);
+
+        imagesavealpha($newImg, true);
+        imagealphablending($newImg, false);
+
+        $transparent = imagecolorallocatealpha($newImg, 0, 0, 0, 127);
+        imagefill($newImg, 0, 0, $transparent);
+
+        $black = imagecolorallocate($newImg, 0, 0, 0);
+        $white = imagecolorallocate($newImg, 255, 255, 255);
+
+        imagecopyresampled($newImg, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+        imagefilledrectangle($newImg, 0, $newHeight - 25,  45, $newHeight, $black);
+        imagettftext($newImg, 12, 0,  5, $newHeight - 7, $white,  public_path('/assets/fonts/arial.ttf'), 'Shop');
+
+        $path = "previews/" . Str::uuid() . ".png";
+        imagepng($newImg, public_path($path));
 
         $data = $v->validated();
         $data['preview'] = $path;
